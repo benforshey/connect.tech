@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      label{
+        display: inline-block;
+        width: 5em;
+      }
+
+      #errorBox{
+        margin: 1em;
+        color: red;
+      }
+    </style>
+
+    <script>
+      window.addEventListener("load", init);
+
+      function init(){
+        let loginForm = document.querySelector("#loginForm");
+        loginForm.addEventListener("submit", handleSubmit);
+
+        // delete user from sessionStorage
+        window.sessionStorage.removeItem("user");
+      }
+
+      function handleSubmit(event){
+        event.preventDefault();
+        let username = document.querySelector("#username").value;
+        fetch(`/${username}.json`)
+          .then( (response) => {
+            switch(response.status){
+              case 200:
+                return response.json();
+                break;
+              default:
+                throw "Invalid Username or Password";
+                break;
+            }
+          })
+          .then( (json) => {
+            loginSuccess(json);
+          })
+          .catch( (error) => {
+            loginFailure(error);
+          });
+      }
+
+      function loginFailure(message){
+        let errorBox = document.querySelector("#errorBox");
+        errorBox.innerHTML = message;
+      }
+
+      function loginSuccess(json){
+        window.sessionStorage.setItem('user', JSON.stringify(json));
+        if(json['accepted-terms']){
+          window.location = "/userlist.html";
+        }else{
+          window.location = "/terms.html";
+        }
+
+      }
+    </script>
+
+  </head>
+  <body>
+    <h1>Login</h1>
+
+    <div id="errorBox"></div>
+
+    <form id="loginForm">
+      <label for="username">Username</label>
+      <input type="text" name="username" id="username">
+      <br>
+
+      <label for="password">Password</label>
+      <input type="text" name="password" id="password">
+      <br>
+      
+      <input type="submit" name="Login" value="Login">
+
+    </form>
+
+  </body>  
+</html>  
+
+
